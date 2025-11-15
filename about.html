@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tentang - TwibbonCraft</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="twibbon.html" class="nav-logo">
+        <img src="assets/img/logo.png" alt="TwibbonCraft" />
+        <span>TwibbonCraft</span>
+      </a>
+      <nav class="nav-links">
+        <a href="twibbon.html">Beranda</a>
+        <a href="templates.html">Template</a>
+        <a href="editor.html">Editor</a>
+        <a href="about.html" class="active">Tentang</a>
+      </nav>
+      <button class="nav-cta" onclick="window.location.href='index.html'">
+       Pesan Layanan
+      </button>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Nav -->
+  <nav class="nav-mobile" id="navMobile">
+    <a href="twibbon.html">Beranda</a>
+    <a href="templates.html">Template</a>
+    <a href="editor.html">Editor</a>
+    <a href="about.html" class="active">Tentang</a>
+  </nav>
+
+  <main class="page">
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <h1>Tentang TwibbonCraft</h1>
+          <p>Editor twibbon modern untuk kampanye, event, dan brand profesional.</p>
+        </div>
+
+        <div class="about-grid">
+          <div class="card-elevated about-card">
+            <h2>Visi Produk</h2>
+            <p>
+              TwibbonCraft dibuat untuk mempermudah siapa pun dalam membuat twibbon
+              berkualitas tinggi langsung dari browser tanpa aplikasi tambahan.
+            </p>
+            <p>
+              Fokus kami adalah menghadirkan pengalaman editing yang intuitif, cepat,
+              dan tampilan antarmuka yang terasa seperti produk startup modern.
+            </p>
+          </div>
+
+          <div class="card-elevated about-card">
+            <h2>Fitur Utama</h2>
+            <ul class="bullet-list">
+              <li>Editor berbasis HTML5 Canvas.</li>
+              <li>Upload foto dan template twibbon kustom.</li>
+              <li>Drag, zoom, dan rotate foto secara real-time.</li>
+              <li>Download hasil akhir sebagai PNG / JPG tanpa watermark.</li>
+            </ul>
+          </div>
+
+          <div class="card-elevated about-card">
+            <h2>Teknologi</h2>
+            <ul class="bullet-list">
+              <li>HTML5, CSS3 (Flexbox & Grid), JavaScript murni.</li>
+              <li>Desain responsif untuk mobile, tablet, dan desktop.</li>
+              <li>Tipografi Poppins / Montserrat, warna utama #6a2de6.</li>
+            </ul>
+          </div>
+
+          <div class="card-elevated about-card">
+            <h2>Kontak</h2>
+            <p>
+              Punya saran atau ingin berkolaborasi? Silakan hubungi kami melalui email:
+            </p>
+            <p>
+              <a href="mailto:hello@twibboncraft.local" class="accent-link">
+                hello@twibboncraft.local
+              </a>
+            </p>
+            <p>
+              TwibbonCraft berjalan sepenuhnya di sisi client, sehingga gambar dan
+              data tidak disimpan di server.
+            </p>
+          </div>
+        </div>
+
+        <div class="section small">
+          <div class="card-elevated about-card single">
+            <h2>Catatan Privasi</h2>
+            <p>
+              Seluruh proses editing twibbon dilakukan langsung di browser kamu.
+              File foto dan template tidak diunggah ke server, sehingga kamu tetap
+              memegang kontrol penuh atas datamu.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> TwibbonCraft.</p>
+      <div class="footer-links">
+        <a href="twibbon.html">Beranda</a>
+        <a href="editor.html">Editor</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

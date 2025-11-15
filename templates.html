@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Template Twibbon - TwibbonCraft</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="twibbon.html" class="nav-logo">
+        <img src="assets/img/logo.png" alt="TwibbonCraft" />
+        <span>TwibbonCraft</span>
+      </a>
+      <nav class="nav-links">
+        <a href="twibbon.html">Beranda</a>
+        <a href="templates.html" class="active">Template</a>
+        <a href="editor.html">Editor</a>
+        <a href="about.html">Tentang</a>
+      </nav>
+      <button class="nav-cta" onclick="window.location.href='index.html'">
+        Pesan Layanan
+      </button>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Nav -->
+  <nav class="nav-mobile" id="navMobile">
+    <a href="twibbon.html">Beranda</a>
+    <a href="templates.html" class="active">Template</a>
+    <a href="editor.html">Editor</a>
+    <a href="about.html">Tentang</a>
+  </nav>
+
+  <main class="page">
+    <section class="section">
+      <div class="container">
+        <div class="section-header section-header-inline">
+          <div>
+            <h1>Template Twibbon Default</h1>
+            <p>Pilih template yang kamu suka lalu lanjutkan ke editor.</p>
+          </div>
+          <button class="btn ghost" onclick="window.location.href='editor.html'">
+            Buka Editor Kosong
+          </button>
+        </div>
+
+        <div class="grid templates-grid">
+          <!-- Card 1 -->
+          <article class="twibbon-card card-elevated">
+            <div class="twibbon-thumb">
+              <img src="assets/img/twibbon-1.png" alt="Twibbon Kampanye 1" />
+            </div>
+            <div class="twibbon-body">
+              <h3>Twibbon Kampanye Ungu</h3>
+              <p>Frame ungu modern cocok untuk kampanye digital & acara komunitas.</p>
+              <button class="btn secondary" onclick="window.location.href='editor.html?template=1'">
+                Gunakan Template
+              </button>
+            </div>
+          </article>
+
+          <!-- Card 2 -->
+          <article class="twibbon-card card-elevated">
+            <div class="twibbon-thumb">
+              <img src="assets/img/twibbon-2.png" alt="Twibbon Webinar" />
+            </div>
+            <div class="twibbon-body">
+              <h3>Twibbon Webinar Tech</h3>
+              <p>Desain minimalis dengan aksen geometric untuk event tech & startup.</p>
+              <button class="btn secondary" onclick="window.location.href='editor.html?template=2'">
+                Gunakan Template
+              </button>
+            </div>
+          </article>
+
+          <!-- Card 3 -->
+          <article class="twibbon-card card-elevated">
+            <div class="twibbon-thumb">
+              <img src="assets/img/twibbon-3.png" alt="Twibbon Graduation" />
+            </div>
+            <div class="twibbon-body">
+              <h3>Twibbon Graduation</h3>
+              <p>Frame elegan untuk wisuda, perayaan kelulusan, dan pencapaian lainnya.</p>
+              <button class="btn secondary" onclick="window.location.href='editor.html?template=3'">
+                Gunakan Template
+              </button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Upload Template Section -->
+    <section class="section section-alt">
+      <div class="container upload-template-section card-elevated">
+        <div>
+          <h2>Upload Template Twibbon Sendiri</h2>
+          <p>
+            Punya desain overlay twibbon sendiri? Upload di editor dan gunakan
+            bersama foto-foto terbaikmu.
+          </p>
+          <ul class="bullet-list">
+            <li>Format disarankan: PNG dengan background transparan.</li>
+            <li>Rasio ideal: 1:1 (square) agar pas dengan canvas.</li>
+            <li>File tidak disimpan di server, hanya dipakai di browser kamu.</li>
+          </ul>
+        </div>
+        <div class="upload-template-cta">
+          <p>Upload template langsung di halaman editor.</p>
+          <button class="btn primary" onclick="window.location.href='editor.html#upload-template'">
+            Buka Editor & Upload
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> TwibbonCraft. Semua hak dilindungi.</p>
+      <div class="footer-links">
+        <a href="about.html">Tentang</a>
+        <a href="mailto:hello@twibboncraft.local">Kontak</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Editor Twibbon - TwibbonCraft</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="twibbon.html" class="nav-logo">
+        <img src="assets/img/logo.png" alt="TwibbonCraft" />
+        <span>TwibbonCraft</span>
+      </a>
+      <nav class="nav-links">
+        <a href="twibbon.html">Beranda</a>
+        <a href="templates.html">Template</a>
+        <a href="editor.html" class="active">Editor</a>
+        <a href="about.html">Tentang</a>
+      </nav>
+      <button class="nav-cta" onclick="window.location.href='index.html'">
+        Pesan Layanan
+      </button>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Nav -->
+  <nav class="nav-mobile" id="navMobile">
+    <a href="twibbon.html">Beranda</a>
+    <a href="templates.html">Template</a>
+    <a href="editor.html" class="active">Editor</a>
+    <a href="about.html">Tentang</a>
+  </nav>
+
+  <main class="editor-page">
+    <section class="editor-wrapper">
+      <div class="editor-panel editor-panel-left card-elevated">
+        <div class="editor-panel-header">
+          <h1>Editor Twibbon</h1>
+          <p>Upload foto, pilih twibbon, atur posisi, dan download hasilnya.</p>
+        </div>
+
+        <!-- Foto Controls -->
+        <div class="editor-group">
+          <h2>1. Upload Foto</h2>
+          <p class="group-subtitle">Format: JPG / PNG, resolusi tinggi disarankan.</p>
+          <label class="upload-btn">
+            <input type="file" id="photoInput" accept="image/*" />
+            <span>Upload Foto</span>
+          </label>
+          <p class="helper-text" id="photoInfo">Belum ada foto yang diupload.</p>
+        </div>
+
+        <!-- Template Controls -->
+        <div class="editor-group" id="upload-template">
+          <h2>2. Pilih / Upload Twibbon</h2>
+          <p class="group-subtitle">Gunakan template default atau upload overlay milikmu.</p>
+
+          <div class="template-thumbs">
+            <button class="template-thumb" data-template="1">
+              <img src="assets/img/twibbon-1.png" alt="Template 1" />
+            </button>
+            <button class="template-thumb" data-template="2">
+              <img src="assets/img/twibbon-2.png" alt="Template 2" />
+            </button>
+            <button class="template-thumb" data-template="3">
+              <img src="assets/img/twibbon-3.png" alt="Template 3" />
+            </button>
+          </div>
+
+          <label class="upload-btn subtle">
+            <input type="file" id="templateInput" accept="image/png,image/jpeg" />
+            <span>Upload Template Twibbon</span>
+          </label>
+          <p class="helper-text" id="templateInfo">Menggunakan template default dari sistem.</p>
+        </div>
+      </div>
+
+      <div class="editor-panel editor-panel-right card-elevated">
+        <div class="editor-canvas-header">
+          <span>Canvas Preview</span>
+          <span class="badge">Drag • Zoom • Rotate</span>
+        </div>
+        <div class="editor-canvas-wrapper">
+          <canvas id="twibbonCanvas" width="800" height="800"></canvas>
+          <div class="canvas-hint">
+            <p>Tips:</p>
+            <ul>
+              <li>Gunakan mouse untuk drag foto di dalam frame.</li>
+              <li>Gunakan slider untuk memperbesar dan memutar foto.</li>
+              <li>Upload template PNG transparan untuk hasil terbaik.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- Transform Controls -->
+        <div class="editor-group">
+          <h2>3. Atur Posisi Foto</h2>
+
+          <div class="slider-row">
+            <div class="slider-label">
+              <span>Zoom</span>
+              <span id="zoomValue">100%</span>
+            </div>
+            <input type="range" id="zoomSlider" min="0.05" max="3" step="0.01" value="1" />
+          </div>
+
+          <div class="slider-row">
+            <div class="slider-label">
+              <span>Rotate</span>
+              <span id="rotateValue">0°</span>
+            </div>
+            <input type="range" id="rotateSlider" min="-45" max="45" step="1" value="0" />
+          </div>
+
+          <p class="helper-text">
+            Gunakan mouse / sentuhan untuk drag foto di dalam area canvas.
+          </p>
+
+          <div class="editor-actions">
+            <button class="btn ghost small" id="resetTransform">
+              Reset Posisi
+            </button>
+          </div>
+        </div>
+        <!-- Download Controls -->
+        <div class="editor-group">
+          <h2>4. Download Hasil</h2>
+          <div class="download-row">
+            <label for="downloadFormat">Format:</label>
+            <select id="downloadFormat">
+              <option value="png">PNG (disarankan)</option>
+              <option value="jpeg">JPG</option>
+            </select>
+          </div>
+          <button class="btn primary full-width" id="downloadBtn">
+            Download Twibbon
+          </button>
+          <p class="helper-text">
+            Pastikan foto dan template sudah terpasang sebelum mengunduh.
+          </p>
+        </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> TwibbonCraft. Editor twibbon berbasis web.</p>
+      <div class="footer-links">
+        <a href="about.html">Tentang</a>
+        <a href="mailto:hello@twibboncraft.local">Kontak</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/editor.js"></script>
+</body>
+</html>
