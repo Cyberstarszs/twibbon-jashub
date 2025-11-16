@@ -1,5 +1,3 @@
-// assets/js/editor.js
-
 document.addEventListener("DOMContentLoaded", () => {
   const canvas = document.getElementById("twibbonCanvas");
   const ctx = canvas.getContext("2d");
@@ -15,60 +13,63 @@ document.addEventListener("DOMContentLoaded", () => {
   const rotateValue = document.getElementById("rotateValue");
 
   const resetBtn = document.getElementById("resetTransform");
+  const fitBtn = document.getElementById("fitToFrame");
+  const centerBtn = document.getElementById("centerPhoto");
+  const flipBtn = document.getElementById("flipHorizontal");
+
   const downloadBtn = document.getElementById("downloadBtn");
   const downloadFormat = document.getElementById("downloadFormat");
 
   const templateThumbs = document.querySelectorAll(".template-thumb");
 
-  // State object
+  const brightnessSlider = document.getElementById("brightnessSlider");
+  const contrastSlider = document.getElementById("contrastSlider");
+  const saturateSlider = document.getElementById("saturateSlider");
+  const grayscaleSlider = document.getElementById("grayscaleSlider");
+
+  const brightnessValue = document.getElementById("brightnessValue");
+  const contrastValue = document.getElementById("contrastValue");
+  const saturateValue = document.getElementById("saturateValue");
+  const grayscaleValue = document.getElementById("grayscaleValue");
+
+  const presetButtons = document.querySelectorAll(".filter-preset");
+
   const state = {
     photoImage: null,
     templateImage: null,
     photoScale: 1,
-    photoRotation: 0, // in degrees
+    photoRotation: 0,
     offsetX: 0,
     offsetY: 0,
+    flipX: 1,
     isDragging: false,
     dragStartX: 0,
     dragStartY: 0,
     initialOffsetX: 0,
     initialOffsetY: 0,
+    filters: {
+      brightness: 1,
+      contrast: 1,
+      saturation: 1,
+      grayscale: 0
+    },
+    activePreset: "original"
   };
 
-  // Default templates map (id -> src)
   const templateMap = {
     1: "assets/img/twibbon-1.png",
     2: "assets/img/twibbon-2.png",
-    3: "assets/img/twibbon-3.png",
+    3: "assets/img/twibbon-3.png"
   };
 
-  // Helper: load image from src, return Promise<HTMLImageElement>
   function loadImage(src) {
     return new Promise((resolve, reject) => {
       const img = new Image();
-      img.crossOrigin = "anonymous"; // safer for canvas
+      img.crossOrigin = "anonymous";
       img.onload = () => resolve(img);
-      img.onerror = (err) => reject(err);
+      img.onerror = err => reject(err);
       img.src = src;
     });
-  }
-
-  // Initialize default template based on URL param or first one
-  async function initTemplateFromUrl() {
-    const params = new URLSearchParams(window.location.search);
-    const templateId = params.get("template");
-    let chosenId = templateId && templateMap[templateId] ? templateId : "1";
-
-    try {
-      const img = await loadImage(templateMap[chosenId]);
-      state.templateImage = img;
-      updateTemplateInfo(`Menggunakan template default #${chosenId}.`);
-      markActiveTemplateThumb(chosenId);
-      redraw();
-    } catch (err) {
-      console.warn("Gagal memuat template default:", err);
-      updateTemplateInfo("Gagal memuat template default. Coba upload template sendiri.");
-    }
   }
 
   function updateTemplateInfo(text) {
@@ -80,8 +81,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function markActiveTemplateThumb(id) {
-    templateThumbs.forEach((btn) => {
-      if (btn.dataset.template === String(id)) {
+    templateThumbs.forEach(btn => {
+      if (id && btn.dataset.template === String(id)) {
         btn.classList.add("active");
       } else {
         btn.classList.remove("active");
@@ -89,22 +90,95 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Draw function
+  function buildFilterString() {
+    const f = state.filters;
+    return (
+      "brightness(" +
+      f.brightness +
+      ") contrast(" +
+      f.contrast +
+      ") saturate(" +
+      f.saturation +
+      ") grayscale(" +
+      f.grayscale +
+      ")"
+    );
+  }
+
+  function updateFilterLabelsFromState() {
+    if (brightnessSlider && brightnessValue) {
+      brightnessSlider.value = String(state.filters.brightness);
+      brightnessValue.textContent =
+        Math.round(state.filters.brightness * 100) + "%";
+    }
+    if (contrastSlider && contrastValue) {
+      contrastSlider.value = String(state.filters.contrast);
+      contrastValue.textContent =
+        Math.round(state.filters.contrast * 100) + "%";
+    }
+    if (saturateSlider && saturateValue) {
+      saturateSlider.value = String(state.filters.saturation);
+      saturateValue.textContent =
+        Math.round(state.filters.saturation * 100) + "%";
+    }
+    if (grayscaleSlider && grayscaleValue) {
+      grayscaleSlider.value = String(state.filters.grayscale);
+      grayscaleValue.textContent =
+        Math.round(state.filters.grayscale * 100) + "%";
+    }
+  }
+
+  function setActivePresetButton(name) {
+    presetButtons.forEach(btn => {
+      if (name && btn.dataset.preset === name) {
+        btn.classList.add("active");
+      } else {
+        btn.classList.remove("active");
+      }
+    });
+  }
+
+  function applyPreset(name) {
+    if (name === "soft") {
+      state.filters.brightness = 1.05;
+      state.filters.contrast = 0.95;
+      state.filters.saturation = 1.15;
+      state.filters.grayscale = 0.1;
+    } else if (name === "vibrant") {
+      state.filters.brightness = 1.05;
+      state.filters.contrast = 1.2;
+      state.filters.saturation = 1.4;
+      state.filters.grayscale = 0;
+    } else if (name === "mono") {
+      state.filters.brightness = 1;
+      state.filters.contrast = 1.05;
+      state.filters.saturation = 0;
+      state.filters.grayscale = 1;
+    } else {
+      state.filters.brightness = 1;
+      state.filters.contrast = 1;
+      state.filters.saturation = 1;
+      state.filters.grayscale = 0;
+    }
+    state.activePreset = name;
+    updateFilterLabelsFromState();
+    setActivePresetButton(name);
+    redraw();
+  }
+
   function redraw() {
     if (!ctx || !canvas) return;
-    const { width, height } = canvas;
+    const width = canvas.width;
+    const height = canvas.height;
 
-    // Clear canvas
     ctx.clearRect(0, 0, width, height);
 
-    // Background
     const gradient = ctx.createLinearGradient(0, 0, width, height);
     gradient.addColorStop(0, "#050509");
     gradient.addColorStop(1, "#151522");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, height);
 
-    // Draw photo first
     if (state.photoImage) {
       const img = state.photoImage;
       const centerX = width / 2 + state.offsetX;
@@ -113,19 +187,19 @@ document.addEventListener("DOMContentLoaded", () => {
       ctx.save();
       ctx.translate(centerX, centerY);
       ctx.rotate((state.photoRotation * Math.PI) / 180);
+      ctx.scale(state.flipX, 1);
 
       const scaledW = img.width * state.photoScale;
       const scaledH = img.height * state.photoScale;
 
+      ctx.filter = buildFilterString();
       ctx.drawImage(img, -scaledW / 2, -scaledH / 2, scaledW, scaledH);
       ctx.restore();
+      ctx.filter = "none";
     }
 
-    // Draw template on top
     if (state.templateImage) {
       const tImg = state.templateImage;
-
-      // Fit template to canvas while preserving aspect ratio
       const scale = Math.max(
         canvas.width / tImg.width,
         canvas.height / tImg.height
@@ -134,41 +208,98 @@ document.addEventListener("DOMContentLoaded", () => {
       const tplHeight = tImg.height * scale;
       const tplX = (canvas.width - tplWidth) / 2;
       const tplY = (canvas.height - tplHeight) / 2;
-
       ctx.drawImage(tImg, tplX, tplY, tplWidth, tplHeight);
     }
   }
 
-  // Reset transform values
   function resetTransform() {
     state.photoScale = 1;
     state.photoRotation = 0;
     state.offsetX = 0;
     state.offsetY = 0;
-
+    state.flipX = 1;
     if (zoomSlider) zoomSlider.value = "1";
     if (rotateSlider) rotateSlider.value = "0";
     if (zoomValue) zoomValue.textContent = "100%";
     if (rotateValue) rotateValue.textContent = "0°";
-
     redraw();
   }
 
-  // Handlers: upload photo
+  function fitPhotoToFrame() {
+    if (!state.photoImage || !canvas) return;
+    const img = state.photoImage;
+    const scale = Math.max(
+      canvas.width / img.width,
+      canvas.height / img.height
+    );
+    state.photoScale = scale;
+    state.offsetX = 0;
+    state.offsetY = 0;
+    if (zoomSlider) {
+      zoomSlider.value = String(scale);
+      zoomValue.textContent = Math.round(scale * 100) + "%";
+    }
+    redraw();
+  }
+
+  function centerPhoto() {
+    state.offsetX = 0;
+    state.offsetY = 0;
+    redraw();
+  }
+
+  function flipHorizontal() {
+    state.flipX *= -1;
+    redraw();
+  }
+
+  async function initTemplateFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const communityId = params.get("templateId");
+    const defaultParam = params.get("template");
+
+    if (communityId) {
+      try {
+        const url =
+          "https://drive.google.com/uc?export=view&id=" + communityId;
+        const img = await loadImage(url);
+        state.templateImage = img;
+        updateTemplateInfo("Menggunakan template komunitas");
+        markActiveTemplateThumb(null);
+        redraw();
+        return;
+      } catch (err) {}
+    }
+
+    const chosenId =
+      defaultParam && templateMap[defaultParam] ? defaultParam : "1";
+
+    try {
+      const img = await loadImage(templateMap[chosenId]);
+      state.templateImage = img;
+      updateTemplateInfo("Menggunakan template default #" + chosenId + ".");
+      markActiveTemplateThumb(chosenId);
+      redraw();
+    } catch (err) {
+      updateTemplateInfo(
+        "Gagal memuat template default. Coba upload template sendiri."
+      );
+    }
+  }
+
   if (photoInput) {
-    photoInput.addEventListener("change", async (e) => {
+    photoInput.addEventListener("change", e => {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
-      reader.onload = async (ev) => {
+      reader.onload = async ev => {
         try {
           const img = await loadImage(ev.target.result);
           state.photoImage = img;
           resetTransform();
-          updatePhotoInfo(`Foto terpasang: ${file.name}`);
+          fitPhotoToFrame();
+          updatePhotoInfo("Foto terpasang: " + file.name);
         } catch (err) {
-          console.error("Gagal memuat foto:", err);
           updatePhotoInfo("Gagal memuat foto. Coba file lain.");
         }
         redraw();
@@ -177,22 +308,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Handlers: upload template
   if (templateInput) {
-    templateInput.addEventListener("change", (e) => {
+    templateInput.addEventListener("change", e => {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
-      reader.onload = async (ev) => {
+      reader.onload = async ev => {
         try {
           const img = await loadImage(ev.target.result);
           state.templateImage = img;
-          updateTemplateInfo(`Template kustom terpasang: ${file.name}`);
+          updateTemplateInfo("Template kustom terpasang: " + file.name);
           markActiveTemplateThumb(null);
           redraw();
         } catch (err) {
-          console.error("Gagal memuat template:", err);
           updateTemplateInfo("Gagal memuat template. Coba file lain.");
         }
       };
@@ -200,28 +328,24 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Handlers: default template thumbnails
   if (templateThumbs.length > 0) {
-    templateThumbs.forEach((btn) => {
+    templateThumbs.forEach(btn => {
       btn.addEventListener("click", async () => {
         const id = btn.dataset.template;
         if (!id || !templateMap[id]) return;
-
         try {
           const img = await loadImage(templateMap[id]);
           state.templateImage = img;
-          updateTemplateInfo(`Menggunakan template default #${id}.`);
+          updateTemplateInfo("Menggunakan template default #" + id + ".");
           markActiveTemplateThumb(id);
           redraw();
         } catch (err) {
-          console.error("Gagal memuat template default:", err);
           updateTemplateInfo("Gagal memuat template default.");
         }
       });
     });
   }
 
-  // Zoom slider
   if (zoomSlider && zoomValue) {
     zoomSlider.addEventListener("input", () => {
       const value = parseFloat(zoomSlider.value);
@@ -231,7 +355,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Rotate slider
   if (rotateSlider && rotateValue) {
     rotateSlider.addEventListener("input", () => {
       const deg = parseFloat(rotateSlider.value);
@@ -241,16 +364,74 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Reset button
   if (resetBtn) {
-    resetBtn.addEventListener("click", () => {
-      resetTransform();
+    resetBtn.addEventListener("click", resetTransform);
+  }
+  if (fitBtn) {
+    fitBtn.addEventListener("click", fitPhotoToFrame);
+  }
+  if (centerBtn) {
+    centerBtn.addEventListener("click", centerPhoto);
+  }
+  if (flipBtn) {
+    flipBtn.addEventListener("click", flipHorizontal);
+  }
+
+  if (brightnessSlider && brightnessValue) {
+    brightnessSlider.addEventListener("input", () => {
+      state.filters.brightness = parseFloat(brightnessSlider.value);
+      brightnessValue.textContent =
+        Math.round(state.filters.brightness * 100) + "%";
+      state.activePreset = "custom";
+      setActivePresetButton(null);
+      redraw();
     });
   }
 
-  // Dragging on canvas (mouse)
+  if (contrastSlider && contrastValue) {
+    contrastSlider.addEventListener("input", () => {
+      state.filters.contrast = parseFloat(contrastSlider.value);
+      contrastValue.textContent =
+        Math.round(state.filters.contrast * 100) + "%";
+      state.activePreset = "custom";
+      setActivePresetButton(null);
+      redraw();
+    });
+  }
+
+  if (saturateSlider && saturateValue) {
+    saturateSlider.addEventListener("input", () => {
+      state.filters.saturation = parseFloat(saturateSlider.value);
+      saturateValue.textContent =
+        Math.round(state.filters.saturation * 100) + "%";
+      state.activePreset = "custom";
+      setActivePresetButton(null);
+      redraw();
+    });
+  }
+
+  if (grayscaleSlider && grayscaleValue) {
+    grayscaleSlider.addEventListener("input", () => {
+      state.filters.grayscale = parseFloat(grayscaleSlider.value);
+      grayscaleValue.textContent =
+        Math.round(state.filters.grayscale * 100) + "%";
+      state.activePreset = "custom";
+      setActivePresetButton(null);
+      redraw();
+    });
+  }
+
+  if (presetButtons.length > 0) {
+    presetButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const name = btn.dataset.preset || "original";
+        applyPreset(name);
+      });
+    });
+  }
+
   if (canvas) {
-    canvas.addEventListener("mousedown", (e) => {
+    canvas.addEventListener("mousedown", e => {
       if (!state.photoImage) return;
       state.isDragging = true;
       state.dragStartX = e.clientX;
@@ -259,7 +440,7 @@ document.addEventListener("DOMContentLoaded", () => {
       state.initialOffsetY = state.offsetY;
     });
 
-    window.addEventListener("mousemove", (e) => {
+    window.addEventListener("mousemove", e => {
       if (!state.isDragging) return;
       const deltaX = e.clientX - state.dragStartX;
       const deltaY = e.clientY - state.dragStartY;
@@ -272,10 +453,9 @@ document.addEventListener("DOMContentLoaded", () => {
       state.isDragging = false;
     });
 
-    // Dragging on canvas (touch)
     canvas.addEventListener(
       "touchstart",
-      (e) => {
+      e => {
         if (!state.photoImage) return;
         const touch = e.touches[0];
         if (!touch) return;
@@ -290,7 +470,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener(
       "touchmove",
-      (e) => {
+      e => {
         if (!state.isDragging) return;
         const touch = e.touches[0];
         if (!touch) return;
@@ -308,35 +488,30 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Download merged image
   if (downloadBtn && downloadFormat) {
     downloadBtn.addEventListener("click", () => {
       if (!state.photoImage || !state.templateImage) {
         alert("Pastikan foto dan template sudah terpasang sebelum download.");
         return;
       }
-
       const format = downloadFormat.value === "jpeg" ? "jpeg" : "png";
       let dataUrl;
-
       if (format === "png") {
         dataUrl = canvas.toDataURL("image/png");
       } else {
         dataUrl = canvas.toDataURL("image/jpeg", 0.95);
       }
-
       const link = document.createElement("a");
       link.href = dataUrl;
-      link.download = `twibbon-${Date.now()}.${format}`;
+      link.download = "twibbon-hd-" + Date.now() + "." + format;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     });
   }
 
-  // Initialize template from URL if possible
+  updateFilterLabelsFromState();
   initTemplateFromUrl().finally(() => {
-    // initial draw
     redraw();
   });
 });

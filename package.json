@@ -1,0 +1,11 @@
+{
+  "name": "twibbon-jashub",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "googleapis": "^135.0.0",
+    "formidable": "^3.5.0"
+  }
+}

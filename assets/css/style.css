@@ -316,6 +316,25 @@ body {
   width: 100%;
 }
 
+/* Chip style for filter presets */
+.btn.chip {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: none;
+}
+
+.btn.chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.btn.chip.active {
+  border-color: rgba(176, 105, 255, 0.9);
+  background: rgba(106, 45, 230, 0.25);
+}
+
 .hero-badges {
   display: flex;
   gap: 8px;
@@ -793,9 +812,20 @@ input[type="range"]::-moz-range-thumb {
 .editor-actions {
   margin-top: 10px;
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   justify-content: flex-end;
 }
 
+/* Filter presets row */
+.filter-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* Download row */
 .download-row {
   display: flex;
   align-items: center;
@@ -906,34 +936,70 @@ input[type="range"]::-moz-range-thumb {
   color: #ffffff;
 }
 
-/* Footer */
+/* Footer (Jashub Store) */
 .footer {
   border-top: 1px solid rgba(255, 255, 255, 0.06);
-  padding: 16px 0;
   background: #050509;
+  padding-top: 28px;
 }
 
-.footer-inner {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  font-size: 0.85rem;
+.footer-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  align-items: flex-start;
+  font-size: 0.9rem;
   color: var(--color-text-muted);
 }
 
-.footer-links {
-  display: flex;
-  gap: 12px;
+.footer-brand h3 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
 }
 
-.footer-links a {
+.footer-brand p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.footer-column h4 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  color: #ffffff;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-column li {
+  margin-bottom: 6px;
+}
+
+.footer-column a {
   text-decoration: none;
   color: var(--color-text-muted);
+  font-size: 0.87rem;
 }
 
-.footer-links a:hover {
+.footer-column a:hover {
   color: #ffffff;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 20px;
+}
+
+.footer-bottom-inner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 14px 0 18px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
 }
 
 /* Page wrapper spacing */
@@ -990,6 +1056,10 @@ input[type="range"]::-moz-range-thumb {
   .editor-panel-right {
     max-height: unset;
   }
+
+  .footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 768px) {
@@ -1029,6 +1099,10 @@ input[type="range"]::-moz-range-thumb {
     width: 64px;
     height: 64px;
   }
+
+  .footer-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 480px) {
@@ -1048,3 +1122,4 @@ input[type="range"]::-moz-range-thumb {
     padding: 14px 13px 16px;
   }
 }
+
