@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TwibbonCraft - Editor Twibbon Jashub</title>
+
   <meta name="description" content="Jashub Store menyediakan berbagai aplikasi premium seperti Spotify, Canva, CapCut, Netflix, dan lainnya dengan harga murah dan bergaransi.">
   <meta name="keywords" content="jual aplikasi premium, spotify murah, canva pro murah, capcut pro, netflix sharing, beli aplikasi murah, akun premium garansi">
   <meta name="author" content="Jashub Store">
@@ -17,10 +18,12 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Jashub Store">
+
   <link rel="stylesheet" href="assets/css/style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet" />
+
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-JHQ1Y3T4LF"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -299,41 +302,41 @@
   <script src="assets/js/main.js"></script>
   <script src="assets/js/editor.js"></script>
   <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    var form = document.getElementById("uploadToGalleryForm");
-    if (!form) return;
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      var fileInput = document.getElementById("galleryTemplateInput");
-      var titleInput = document.getElementById("templateTitle");
-      if (!fileInput.files || !fileInput.files[0]) {
-        alert("Pilih file terlebih dahulu");
-        return;
-      }
-      var formData = new FormData();
-      formData.append("file", fileInput.files[0]);
-      if (titleInput.value) {
-        formData.append("title", titleInput.value);
-      }
-      fetch("/api/templates", {
-        method: "POST",
-        body: formData
-      })
-        .then(function (res) { return res.json(); })
-        .then(function (data) {
-          if (data && data.ok && data.id) {
-            alert("Template berhasil diupload ke galeri");
-          } else if (data && data.error) {
-            alert("Upload gagal: " + data.error);
-          } else {
-            alert("Upload gagal: respons server tidak valid");
-          }
+    document.addEventListener("DOMContentLoaded", function () {
+      var form = document.getElementById("uploadToGalleryForm");
+      if (!form) return;
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var fileInput = document.getElementById("galleryTemplateInput");
+        var titleInput = document.getElementById("templateTitle");
+        if (!fileInput.files || !fileInput.files[0]) {
+          alert("Pilih file terlebih dahulu");
+          return;
+        }
+        var formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+        if (titleInput.value) {
+          formData.append("title", titleInput.value);
+        }
+        fetch("/api/templates", {
+          method: "POST",
+          body: formData
         })
-        .catch(function (err) {
-          alert("Gagal upload template ke galeri");
-        });
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            if (data && data.ok && data.id) {
+              alert("Template berhasil diupload ke galeri");
+            } else if (data && data.error) {
+              alert("Upload gagal: " + data.error);
+            } else {
+              alert("Upload gagal: respons server tidak valid");
+            }
+          })
+          .catch(function () {
+            alert("Gagal upload template ke galeri");
+          });
+      });
     });
-  });
-</script>
+  </script>
 </body>
 </html>
