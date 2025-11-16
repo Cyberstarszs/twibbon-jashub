@@ -1,23 +1,17 @@
 const fs = require("fs");
-const { google } = require("googleapis");
 const formidable = require("formidable");
+const { createClient } = require("@supabase/supabase-js");
 
-function getDriveClient() {
-  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const key = process.env.GOOGLE_PRIVATE_KEY;
-  const auth = new google.auth.JWT(
-    email,
-    null,
-    key.replace(/\\n/g, "\n"),
-    ["https://www.googleapis.com/auth/drive"]
-  );
-  return google.drive({ version: "v3", auth });
-}
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 function parseForm(req) {
   return new Promise((resolve, reject) => {
     const form = new formidable.IncomingForm();
     form.multiples = false;
+    form.keepExtensions = true;
     form.parse(req, (err, fields, files) => {
       if (err) return reject(err);
       resolve({ fields, files });
@@ -25,99 +19,142 @@ function parseForm(req) {
   });
 }
 
+async function handleList(req, res) {
+  const { data, error } = await supabase
+    .storage
+    .from("twibbon-templates")
+    .list("templates", { sortBy: { column: "created_at", order: "desc" } });
+
+  if (error) {
+    res.statusCode = 500;
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify({ ok: false, error: error.message }));
+    return;
+  }
+
+  const templates = (data || []).map(item => {
+    const path = "templates/" + item.name;
+    const { data: publicUrlData } = supabase
+      .storage
+      .from("twibbon-templates")
+      .getPublicUrl(path);
+
+    return {
+      id: path,
+      title: item.name,
+      imageUrl: publicUrlData.publicUrl,
+      createdAt: item.created_at || null
+    };
+  });
+
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "application/json");
+  res.end(JSON.stringify({ ok: true, templates }));
+}
+
+async function handleUpload(req, res) {
+  const { fields, files } = await parseForm(req);
+
+  let file = files.file || files.template;
+  if (Array.isArray(file)) file = file[0];
+
+  if (!file) {
+    res.statusCode = 400;
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify({ ok: false, error: "Field file tidak ditemukan" }));
+    return;
+  }
+
+  const titleField = fields.title;
+  const originalName = file.originalFilename || "twibbon-template.png";
+  const safeTitle =
+    (Array.isArray(titleField) ? titleField[0] : titleField) || originalName;
+
+  const ext = originalName.includes(".")
+    ? originalName.slice(originalName.lastIndexOf("."))
+    : ".png";
+
+  const fileName = Date.now() + "-" + safeTitle.replace(/\s+/g, "-") + ext;
+  const storagePath = "templates/" + fileName;
+
+  const filePath = file.filepath || file.path;
+  const buffer = fs.readFileSync(filePath);
+
+  const { error: uploadError } = await supabase.storage
+    .from("twibbon-templates")
+    .upload(storagePath, buffer, {
+      contentType: file.mimetype || "image/png",
+      upsert: false
+    });
+
+  if (uploadError) {
+    res.statusCode = 500;
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify({ ok: false, error: uploadError.message }));
+    return;
+  }
+
+  const { data: publicUrlData } = supabase
+    .storage
+    .from("twibbon-templates")
+    .getPublicUrl(storagePath);
+
+  const publicUrl = publicUrlData.publicUrl;
+
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "application/json");
+  res.end(
+    JSON.stringify({
+      ok: true,
+      id: storagePath,
+      title: safeTitle,
+      imageUrl: publicUrl,
+      createdAt: new Date().toISOString()
+    })
+  );
+}
+
 module.exports = async (req, res) => {
-  const drive = getDriveClient();
-  const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    res.statusCode = 500;
+    res.setHeader("Content-Type", "application/json");
+    res.end(
+      JSON.stringify({
+        ok: false,
+        error: "Supabase env tidak lengkap"
+      })
+    );
+    return;
+  }
 
   if (req.method === "GET") {
     try {
-      const result = await drive.files.list({
-        q: "'" + folderId + "' in parents and trashed=false",
-        fields: "files(id, name, createdTime)",
-        orderBy: "createdTime desc"
-      });
-
-      const files = result.data.files || [];
-      const templates = files.map(f => {
-        return {
-          id: f.id,
-          title: f.name,
-          imageUrl: "https://drive.google.com/uc?export=view&id=" + f.id,
-          createdAt: f.createdTime
-        };
-      });
-
-      res.statusCode = 200;
-      res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify(templates));
+      await handleList(req, res);
     } catch (err) {
       res.statusCode = 500;
       res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify({ error: "Gagal mengambil daftar template" }));
+      res.end(
+        JSON.stringify({
+          ok: false,
+          error: err.message || "Gagal mengambil template"
+        })
+      );
     }
     return;
   }
 
   if (req.method === "POST") {
     try {
-      const { fields, files } = await parseForm(req);
-      const file = files.file;
-      if (!file) {
-        res.statusCode = 400;
-        res.setHeader("Content-Type", "application/json");
-        res.end(JSON.stringify({ error: "File tidak ditemukan" }));
-        return;
-      }
-
-      const titleField = fields.title;
-      const title =
-        (Array.isArray(titleField) ? titleField[0] : titleField) ||
-        file.originalFilename ||
-        "twibbon-template";
-
-      const fileMetadata = {
-        name: title,
-        parents: [folderId]
-      };
-
-      const filePath = file.filepath || file.path;
-      const media = {
-        mimeType: file.mimetype,
-        body: fs.createReadStream(filePath)
-      };
-
-      const driveRes = await drive.files.create({
-        requestBody: fileMetadata,
-        media,
-        fields: "id, name"
-      });
-
-      const fileId = driveRes.data.id;
-
-      await drive.permissions.create({
-        fileId,
-        requestBody: {
-          role: "reader",
-          type: "anyone"
-        }
-      });
-
-      const imageUrl = "https://drive.google.com/uc?export=view&id=" + fileId;
-
-      res.statusCode = 200;
-      res.setHeader("Content-Type", "application/json");
-      res.end(
-        JSON.stringify({
-          id: fileId,
-          title: driveRes.data.name,
-          imageUrl,
-          createdAt: new Date().toISOString()
-        })
-      );
+      await handleUpload(req, res);
     } catch (err) {
       res.statusCode = 500;
       res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify({ error: "Gagal upload template" }));
+      res.end(
+        JSON.stringify({
+          ok: false,
+          error: err.message || "Gagal upload template"
+        })
+      );
     }
     return;
   }

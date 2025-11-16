@@ -2,10 +2,11 @@
   "name": "twibbon-jashub",
   "version": "1.0.0",
   "scripts": {
+    "dev": "vercel dev",
     "start": "vercel dev"
   },
   "dependencies": {
-    "googleapis": "^135.0.0",
-    "formidable": "^3.5.0"
+    "@supabase/supabase-js": "^2.48.0",
+    "formidable": "^2.1.1"
   }
 }
