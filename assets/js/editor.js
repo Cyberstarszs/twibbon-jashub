@@ -235,7 +235,7 @@ document.addEventListener("DOMContentLoaded", () => {
     state.photoScale = scale;
     state.offsetX = 0;
     state.offsetY = 0;
-    if (zoomSlider) {
+    if (zoomSlider && zoomValue) {
       zoomSlider.value = String(scale);
       zoomValue.textContent = Math.round(scale * 100) + "%";
     }
@@ -255,20 +255,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function initTemplateFromUrl() {
     const params = new URLSearchParams(window.location.search);
-    const communityId = params.get("templateId");
+    const directUrl = params.get("templateUrl");
     const defaultParam = params.get("template");
 
-    if (communityId) {
+    if (directUrl) {
       try {
-        const url =
-          "https://drive.google.com/uc?export=view&id=" + communityId;
-        const img = await loadImage(url);
+        const img = await loadImage(directUrl);
         state.templateImage = img;
         updateTemplateInfo("Menggunakan template komunitas");
         markActiveTemplateThumb(null);
         redraw();
         return;
-      } catch (err) {}
+      } catch (err) {
+        updateTemplateInfo("Gagal memuat template komunitas. Coba lagi atau pilih template lain.");
+      }
     }
 
     const chosenId =
@@ -281,9 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
       markActiveTemplateThumb(chosenId);
       redraw();
     } catch (err) {
-      updateTemplateInfo(
-        "Gagal memuat template default. Coba upload template sendiri."
-      );
+      updateTemplateInfo("Gagal memuat template default. Coba upload template sendiri.");
     }
   }
 
@@ -488,7 +486,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  if (downloadBtn && downloadFormat) {
+  if (downloadBtn && downloadFormat && canvas) {
     downloadBtn.addEventListener("click", () => {
       if (!state.photoImage || !state.templateImage) {
         alert("Pastikan foto dan template sudah terpasang sebelum download.");
